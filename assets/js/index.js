@@ -99,7 +99,7 @@ $(document).ready(function() {
 			return;
 		}
 		//alert("?")
-		if((text.indexOf("\n") != -1 || text.indexOf(" ") != -1) && isNumeric(text)) {
+		if(text.indexOf("\n") != -1 || text.indexOf(" ") != -1) {
 			pressedNumber(text);
 			$("#input").val("");
 			return;
