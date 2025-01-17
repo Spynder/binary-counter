@@ -13,6 +13,7 @@ $(document).ready(function() {
 		settings["maxCorrectAnswers"] = parseInt($("#optionMaxCorrectAnswers").val());
 		settings["penalty"] = parseInt($("#optionPenalty").val());
 		settings["backwards"] = $("#optionBackwards").is(":checked");
+		settings["speedrunner"] = $("#optionSpeedrunner").is(":checked");
 	}
 
 	function getRandomInt(max) {
@@ -70,6 +71,12 @@ $(document).ready(function() {
 		}
 		$("#counter").text(`${correct}/${total}`);
 		if(correct >= settings["maxCorrectAnswers"]) {
+			if(correct == total) {
+				$("#hint").text("PERFECT!");
+				$("#hint").addClass("correct");
+				$("#hint").removeClass("wrong");
+				$("#hint").addClass("perfect");
+			}
 			stopGame();
 			return;
 		}
@@ -79,14 +86,37 @@ $(document).ready(function() {
 	function isNumeric(value) {
 		return /^-?\d+$/.test(value);
 	}
+	function isBlank(str) {
+		return (!str || /^\s*$/.test(str));
+	}
+	
 
 	$("#input").on("change keyup paste", function(e) {
 		if(!running) return;
 		let text = e.target.value;
+		if(isBlank(text)) {
+			$("#input").val(text.replace(/\s/g,"")); 
+			return;
+		}
 		//alert("?")
-		if(text.indexOf("\n") != -1 || text.indexOf(" ") != -1 && isNumeric(text) && text != "") {
+		if((text.indexOf("\n") != -1 || text.indexOf(" ") != -1) && isNumeric(text)) {
 			pressedNumber(text);
 			$("#input").val("");
+			return;
 		}
+		if(settings["speedrunner"]) {
+			text = text.replace(/\s/g,"");
+			if(typeof(currNumber) == "number" && text.length >= Math.pow(2, settings["binaryDigits"]).toString().length) {
+				pressedNumber(text);
+				$("#input").val("");
+				return;
+			}
+			else if(typeof(currNumber) == "string" && text.length >= settings["binaryDigits"]) {
+				pressedNumber(text);
+				$("#input").val("");
+				return;
+			}
+		}
+		$("#input").val(text.replace(/\s/g,"")); 
 	});
 });
