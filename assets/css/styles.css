@@ -110,4 +110,8 @@ textarea {
 #settings div input {
   width: 100px;
 }
+
+.decimal {
+  text-decoration: underline;
+}
 /*# sourceMappingURL=styles.css.map */
