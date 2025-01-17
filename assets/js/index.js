@@ -1,5 +1,7 @@
 $(document).ready(function() {
+	$("#start").focus();
 	$("#game").hide();
+	loadSettings();
 	$("#start").click(function() {
 		$("#firstPage").hide();
 		$("#game").show();
@@ -7,13 +9,21 @@ $(document).ready(function() {
 		startGame();
 	});
 
-	let settings = {};
+	function loadSettings() {
+		$("#optionBinaryDigits").val(localStorage.getItem("binaryDigits") ?? 4);
+		$("#optionMaxCorrectAnswers").val(localStorage.getItem("maxCorrectAnswers") ?? 16);
+		$("#optionPenalty").val(localStorage.getItem("penalty") ?? 5);
+		$("#optionBackwards").prop("checked", localStorage.getItem("backwards") ?? true);
+		$("#optionSpeedrunner").prop("checked", localStorage.getItem("speedrunner") ?? false);
+	}
+
 	function collectSettings() {
-		settings["binaryDigits"] = parseInt($("#optionBinaryDigits").val());
-		settings["maxCorrectAnswers"] = parseInt($("#optionMaxCorrectAnswers").val());
-		settings["penalty"] = parseInt($("#optionPenalty").val());
-		settings["backwards"] = $("#optionBackwards").is(":checked");
-		settings["speedrunner"] = $("#optionSpeedrunner").is(":checked");
+		localStorage.setItem("binaryDigits", parseInt($("#optionBinaryDigits").val()));
+		localStorage.setItem("maxCorrectAnswers", parseInt($("#optionMaxCorrectAnswers").val()));
+		localStorage.setItem("penalty", parseInt($("#optionPenalty").val()));
+		localStorage.setItem("backwards", $("#optionBackwards").is(":checked"));
+		localStorage.setItem("speedrunner", $("#optionSpeedrunner").is(":checked"));
+		
 	}
 
 	function getRandomInt(max) {
@@ -28,7 +38,7 @@ $(document).ready(function() {
 		showNumber();
 		start = Date.now();
 		timer = setInterval(function() {
-			let passed = Date.now() - start + (total-correct)*settings["penalty"]*1000;
+			let passed = Date.now() - start + (total-correct)*localStorage.getItem("penalty")*1000;
 			let milliseconds = (passed%1000).toString().padStart(3, '0');
 			let seconds = (Math.floor(passed/1000) % 60).toString().padStart(2, '0');
 			let minutes = (Math.floor(passed/60000)).toString().padStart(2, '0');
@@ -46,13 +56,13 @@ $(document).ready(function() {
 	let total = 0;
 	let correct = 0;
 	function showNumber() {
-		currNumber = getRandomInt(Math.pow(2, settings["binaryDigits"]));
-		if(settings["backwards"] && getRandomInt(2) == 1) {
+		currNumber = getRandomInt(Math.pow(2, localStorage.getItem("binaryDigits")));
+		if(localStorage.getItem("backwards") && getRandomInt(2) == 1) {
 			$("#number").text(currNumber);
 			$("#number").addClass("decimal");
-			currNumber = currNumber.toString(2).padStart(settings["binaryDigits"], '0');
+			currNumber = currNumber.toString(2).padStart(localStorage.getItem("binaryDigits"), '0');
 		} else {
-			$("#number").text(currNumber.toString(2).padStart(settings["binaryDigits"], '0'));
+			$("#number").text(currNumber.toString(2).padStart(localStorage.getItem("binaryDigits"), '0'));
 			$("#number").removeClass("decimal");
 		}
 	}
@@ -70,7 +80,7 @@ $(document).ready(function() {
 			$("#hint").removeClass("correct");
 		}
 		$("#counter").text(`${correct}/${total}`);
-		if(correct >= settings["maxCorrectAnswers"]) {
+		if(correct >= localStorage.getItem("maxCorrectAnswers")) {
 			if(correct == total) {
 				$("#hint").text("PERFECT!");
 				$("#hint").addClass("correct");
@@ -83,9 +93,6 @@ $(document).ready(function() {
 		showNumber();
 	}
 
-	function isNumeric(value) {
-		return /^-?\d+$/.test(value);
-	}
 	function isBlank(str) {
 		return (!str || /^\s*$/.test(str));
 	}
@@ -104,14 +111,14 @@ $(document).ready(function() {
 			$("#input").val("");
 			return;
 		}
-		if(settings["speedrunner"]) {
+		if(localStorage.getItem("speedrunner")) {
 			text = text.replace(/\s/g,"");
-			if(typeof(currNumber) == "number" && text.length >= Math.pow(2, settings["binaryDigits"]).toString().length) {
+			if(typeof(currNumber) == "number" && text.length >= Math.pow(2, localStorage.getItem("binaryDigits")).toString().length) {
 				pressedNumber(text);
 				$("#input").val("");
 				return;
 			}
-			else if(typeof(currNumber) == "string" && text.length >= settings["binaryDigits"]) {
+			else if(typeof(currNumber) == "string" && text.length >= localStorage.getItem("binaryDigits")) {
 				pressedNumber(text);
 				$("#input").val("");
 				return;
