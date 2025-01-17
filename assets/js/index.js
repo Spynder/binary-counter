@@ -3,8 +3,17 @@ $(document).ready(function() {
     $("#start").click(function() {
         $("#firstPage").hide();
         $("#game").show();
+        collectSettings();
         startGame();
     });
+
+    let settings = {};
+    function collectSettings() {
+        settings["binaryDigits"] = parseInt($("#optionBinaryDigits").val());
+        settings["maxCorrectAnswers"] = parseInt($("#optionMaxCorrectAnswers").val());
+        settings["penalty"] = parseInt($("#optionPenalty").val());
+        settings["backwards"] = $("#optionBackwards").is(":checked");
+    }
 
     function getRandomInt(max) {
         return Math.floor(Math.random() * max);
@@ -18,7 +27,7 @@ $(document).ready(function() {
         showNumber();
         start = Date.now();
         timer = setInterval(function() {
-            let passed = Date.now() - start;
+            let passed = Date.now() - start + (total-correct)*settings["penalty"]*1000;
             let milliseconds = (passed%1000).toString().padStart(3, '0');
             let seconds = (Math.floor(passed/1000) % 60).toString().padStart(2, '0');
             let minutes = (Math.floor(passed/60000)).toString().padStart(2, '0');
@@ -36,14 +45,17 @@ $(document).ready(function() {
     let total = 0;
     let correct = 0;
     function showNumber() {
-        currNumber = getRandomInt(16);
-        $("#number").text(currNumber.toString(2).padStart(4, '0'));
+        currNumber = getRandomInt(Math.pow(2, settings["binaryDigits"]));
+        if(settings["backwards"] && getRandomInt(2) == 1) {
+            $("#number").text(currNumber);
+            currNumber = currNumber.toString(2).padStart(settings["binaryDigits"], '0');
+        } else
+            $("#number").text(currNumber.toString(2).padStart(settings["binaryDigits"], '0'));
     }
 
     function pressedNumber(num) {
-        if(num == -1) return;
         total+=1;
-        if(num == currNumber) {
+        if(num == currNumber || parseInt(num) == currNumber) {
             $("#hint").text("Correct!");
             $("#hint").addClass("correct");
             $("#hint").removeClass("wrong");
@@ -54,7 +66,7 @@ $(document).ready(function() {
             $("#hint").removeClass("correct");
         }
         $("#counter").text(`${correct}/${total}`);
-        if(correct == 16) {
+        if(correct >= settings["maxCorrectAnswers"]) {
             stopGame();
             return;
         }
@@ -69,8 +81,8 @@ $(document).ready(function() {
         if(!running) return;
         let text = e.target.value;
         //alert("?")
-        if(text.indexOf("\n") != -1 || text.indexOf(" ") != -1 && isNumeric(text)) {
-            pressedNumber(parseInt(text));
+        if(text.indexOf("\n") != -1 || text.indexOf(" ") != -1 && isNumeric(text) && text != "") {
+            pressedNumber(text);
             $("#input").val("");
         }
     });

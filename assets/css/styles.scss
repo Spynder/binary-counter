@@ -65,10 +65,13 @@ textarea {
 	align-self: flex-end;
 	margin: 50px;
 	div {
+		width:100%;
 		display: flex;
 		flex-direction: row;
+		margin: 5px 0;
 		p {
 			padding-right: 10px;
+			flex-grow:1;
 		}
 		input { 
 			width: 100px;
